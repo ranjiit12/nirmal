@@ -6,7 +6,7 @@ const express = require("express"),
 
 // connecting to mongoose
 const mongooseURI = require("./config/keys").mongooseURI;
-mongoose.connect("mongodb://localhost:27017/nirmal")
+mongoose.connect(mongooseURI)
 .then( () => {
     console.log("connected");
 })
