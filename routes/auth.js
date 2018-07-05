@@ -8,37 +8,16 @@ const express                 = require("express"),
 const User                    = require("../models/user"),
       secretOrkey             = require("../config/keys").secretOrkey;
 
-router.post("/register", (req, res)  => {
-          console.log(req.body);
-        const newUser = User({
-            email: req.body.email,
-            password: req.body.password,
-            lastName: req.body.lastName,
-            firstName: req.body.firstName,
-            isAdmin: req.body.isAdmin
-        });
- 
-        // hash the password 
-        bcrypt.genSalt(10, (err, salt) =>{
-            if(err){
-                res.status(404).json({saltError: err});
-            } else {
-                bcrypt.hash(newUser.password, salt, (err, hash) =>{
-                    if(err) {
-                       res.status(404).json({hashError: err});
-                    } else {
-                        newUser.password = hash;
-                        newUser.save()
-                        .then(user => {
-                            res.json({success:true});
-                        })
-                        .catch(err => {
-                           res.status(404).json({success:false, err:err});
-                        });
-                    }
-                })
-            }
-        })
+const registerUser            = require("../helps/register");      
+
+router.post("/register", passport.authenticate("jwt", {session:false}),(req, res)  => {
+        if(req.user.isAdmin){
+            req.body.isAdmin = true;
+            registerUser(req, res);
+        } else {
+            return res.status(401).json({message:"You are not admin. Can't add people"});
+        }
+        
     }
  );    
  
@@ -46,8 +25,8 @@ router.post("/register", (req, res)  => {
  // @for login of the user
  // @access public
  
- router.post("/login", (req, res) => {
-    
+ router.post("/login",(req, res) => {
+     var errors  = {};
  
        User.findOne({email:req.body.email})
        .then( user => {
@@ -58,8 +37,8 @@ router.post("/register", (req, res)  => {
                    if(isMatch){
                        const payload = {
                          id:user.id, 
-                         isDonor:user.isDonor, 
-                         isProfileCreated:user.isProfileCreated }; // create jwt payload
+                         isAdmin:user.isAdmin, 
+                         }; // create jwt payload
                        // sign token
                        jwt.sign(
                            payload,

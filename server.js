@@ -6,7 +6,7 @@ const express = require("express"),
 
 // connecting to mongoose
 const mongooseURI = require("./config/keys").mongooseURI;
-mongoose.connect(mongooseURI)
+mongoose.connect("mongodb://localhost:27017/nirmal")
 .then( () => {
     console.log("connected");
 })
@@ -23,9 +23,11 @@ app.use(bodyParser.json());
 require("./config/passport")(passport);
 
 // Routes
-const authRoutes = require("./routes/auth");
+const authRoutes = require("./routes/auth"),
+      adminRoutes = require("./routes/admin");
 
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 
 const PORT = process.env.PORT ||5000;
 

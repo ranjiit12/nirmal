@@ -23,6 +23,11 @@ const userSchema = {
         // whether it's donor or delievers
         required:true,
         type: Boolean
+    },
+    typeOfUser:{
+        type:String,
+        required:true,
+        lowercase:true
     }
 }
 
